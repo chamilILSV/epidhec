@@ -1,0 +1,69 @@
+<nb-card>
+  <nb-card-body>
+    <div class="row">
+      <div class="col-xxl-2">
+        <nb-card>
+          <nb-card-body>
+            <div class="stats-month" *ngFor="let user of users">
+              <div>
+                <span class="month" (click)="changeUser(user)">{{ user.username }}</span>
+              </div>
+            </div>
+          </nb-card-body>
+        </nb-card>
+      </div>
+      <div class="col-xxl-4">
+        <nb-card>
+            <nb-card-header>
+              Details : {{ currentUser.username }}
+            </nb-card-header>
+            <nb-card-body>
+              <div class="row"  style="margin-top: 50px">
+                <div class="col-lg-4">
+                  <h6>Chemin :</h6>
+                </div>
+                <div class="col-lg-8">
+                  <ul *ngFor="let path of userPath">
+                    <li *ngIf="path !== 'empty'">{{ path }}</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-4">
+                  <h6>Temps total :</h6>
+                </div>
+                <div class="col-lg-8">
+                  15sec
+                </div>
+              </div>
+              <div class="row" style="margin-top: 30px">
+                <div class="col-lg-4">
+                <h6>Temps passé entre les 2 derniers Beacons :</h6>
+                </div>
+                <div class="col-lg-8">
+                10sec
+                </div>
+              </div>
+
+            </nb-card-body>
+        </nb-card>
+      </div>
+      <div class="col-xxl-5">
+        <div class="row">
+          <div class="col-lg-5">
+            <img *ngIf="isNoPassage" src="assets/images/noPassageUser.png">
+            <img *ngIf="isAllPassage" src="assets/images/allPassageUser.png">
+            <img *ngIf="isLeftOnlyPassage" src="assets/images/leftPassageUser.png">
+            <img *ngIf="isRightOnlyPassage" src="assets/images/rightPassageUser.png">
+          </div>
+        </div>
+        <div class="row">
+          <nb-card>
+            <nb-card-body>
+            </nb-card-body>
+          </nb-card>
+        </div>
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>
