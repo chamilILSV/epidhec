@@ -10,8 +10,19 @@ export class MapPresComponent implements OnInit {
   currentUser: any = null;
   users: any = [];
   userPath: any = [];
+
+  srcImg: string = "assets/images/noPassageUser.png";
+
+  firstBeaconTimestramp: Date;
   dernierBeaconTimestamp: Date;
   avantDernierBeaconTimestamp: Date;
+
+  lastLastPath: string;
+
+  timePathMin : number = 0;
+  timePathSec : number = 0;
+  timeBetween : number = 0;
+
   isNoPassage = false;
   isAllPassage = false;
   isLeftOnlyPassage = false;
@@ -19,7 +30,13 @@ export class MapPresComponent implements OnInit {
 
   constructor(private httpClient: HttpClient) { }
 
-  ngOnInit() {
+  randomIntFromInterval(min,max) // min and max included
+  {
+      return Math.floor(Math.random()*(max-min+1)+min);
+  }
+
+  updateData() {
+
     this.getUsers().then((data : any) => {
       console.log("data users = ", data);
       for (var element in data) {
@@ -32,36 +49,53 @@ export class MapPresComponent implements OnInit {
         this.getUserPath(this.currentUser.id).then(data => {
           this.userPath = data;
           console.log("userPath = ", this.userPath);
+          this.lastLastPath = this.userPath[this.userPath.length - 1];
 
-          this.getTimeStamp(this.userPath[Object.keys(this.userPath)[Object.keys(this.userPath).length - 1]]).then((data: string) => {
+          this.getTimeStamp(this.userPath[this.userPath.length - 1], this.currentUser.id).then((data: string) => {
+            console.log("dernier beacon = ", data, Object);
             this.dernierBeaconTimestamp = new Date(data);
             console.log("dernier beacon = ", this.dernierBeaconTimestamp);
           })
+          if (Object.keys(this.userPath).length > 2) {
+
+            this.getTimeStamp(this.userPath[this.userPath.length - 2], this.currentUser.id).then((data: string) => {
+              console.log("avant dernier beacon = ", data);
+              this.avantDernierBeaconTimestamp = new Date(data);
+              console.log("avant dernier beacon = ", this.dernierBeaconTimestamp);
+              console.log("getime = ", this.dernierBeaconTimestamp.getTime);
+              var randomval = this.randomIntFromInterval(5000, 15000);
+              this.timeBetween += Math.round(this.randomIntFromInterval(1000, 3000) / 1000);
+              console.log("timePath = ", this.timePathMin);
+            })
+          }
+
           if (this.userPath.length == 1) {
-            this.isAllPassage = false;
-            this.isLeftOnlyPassage = false;
-            this.isRightOnlyPassage = false;
-            this.isNoPassage = true;
+            this.srcImg = "assets/images/noPassageUser.png";
           } else if (this.userPath.length == 2 && this.userPath[1] == "H&M") {
-            this.isAllPassage = false;
-            this.isLeftOnlyPassage = false;
-            this.isRightOnlyPassage = true;
-            this.isNoPassage = false;
+            this.srcImg = "assets/images/rightPassageUser.png"
           } else if (this.userPath.length == 2 && this.userPath[1] == "Lego") {
-              this.isAllPassage = false;
-              this.isLeftOnlyPassage = true;
-              this.isRightOnlyPassage = false;
-              this.isNoPassage = false;
+            this.srcImg = "assets/images/leftPassageUser.png"
           } else {
-              this.isAllPassage = true;
-              this.isLeftOnlyPassage = false;
-              this.isRightOnlyPassage = false;
-              this.isNoPassage = false;
+            this.srcImg = "assets/images/allPassageUser.png"
           }
         });
       }
       console.log("users = ", this.users);
     })
+  }
+
+  loopData() {
+    while (1) {
+      console.log("des BARRES ");
+      this.changeUser(this.currentUser);
+      setTimeout(function() {
+        console.log("lol");
+      }, 1000)
+    }
+  }
+
+  ngOnInit() {
+    this.updateData();
   }
 
   changeUser(user) {
@@ -71,37 +105,45 @@ export class MapPresComponent implements OnInit {
     this.getUserPath(this.currentUser.id).then(data => {
       this.userPath = data;
       console.log("userPath = ", this.userPath);
-      this.getTimeStamp(this.userPath[Object.keys(this.userPath)[Object.keys(this.userPath).length - 1]]).then((data: string) => {
+
+      this.timeBetween += Math.round(this.randomIntFromInterval(1000, 3000) / 1000);
+
+      if (this.userPath[this.userPath.length - 1] != this.lastLastPath) {
+        this.timePathMin += Math.round(this.timeBetween / 60);
+        this.timePathSec = Math.round(this.timeBetween % 60);
+        this.lastLastPath = this.userPath[this.userPath.length - 1];
+        this.timeBetween = 0;
+      }
+
+      this.getTimeStamp(this.userPath[Object.keys(this.userPath)[Object.keys(this.userPath).length - 1]], this.currentUser.id).then((data: string) => {
+        console.log("dernier beacon change = ", data);
         this.dernierBeaconTimestamp = new Date(data);
-        console.log("dernier beacon = ", this.dernierBeaconTimestamp);
+        console.log("dernier beacon change = ", this.dernierBeaconTimestamp);
       })
+      if (Object.keys(this.userPath).length > 2) {
+        this.getTimeStamp(this.userPath[Object.keys(this.userPath)[Object.keys(this.userPath).length - 2]], this.currentUser.id).then((data: string) => {
+          console.log("avant dernier beacon = ", data);
+          this.avantDernierBeaconTimestamp = new Date(data);
+          console.log("avant dernier beacon = ", this.dernierBeaconTimestamp);
+          console.log("gettime === ", this.dernierBeaconTimestamp.getTime());
+        })
+      }
+
       if (this.userPath.length == 1) {
-        this.isAllPassage = false;
-        this.isLeftOnlyPassage = false;
-        this.isRightOnlyPassage = false;
-        this.isNoPassage = true;
+        this.srcImg = "assets/images/noPassageUser.png";
       } else if (this.userPath.length == 2 && this.userPath[1] == "H&M") {
-        this.isAllPassage = false;
-        this.isLeftOnlyPassage = false;
-        this.isRightOnlyPassage = true;
-        this.isNoPassage = false;
+        this.srcImg = "assets/images/rightPassageUser.png"
       } else if (this.userPath.length == 2 && this.userPath[1] == "Lego") {
-          this.isAllPassage = false;
-          this.isLeftOnlyPassage = true;
-          this.isRightOnlyPassage = false;
-          this.isNoPassage = false;
+        this.srcImg = "assets/images/leftPassageUser.png"
       } else {
-          this.isAllPassage = true;
-          this.isLeftOnlyPassage = false;
-          this.isRightOnlyPassage = false;
-          this.isNoPassage = false;
+        this.srcImg = "assets/images/allPassageUser.png"
       }
     });
   }
 
-  getTimeStamp(storeName: String) {
+  getTimeStamp(storeName: string, userId: string) {
     console.log("store name = ", storeName)
-    return this.httpClient.get("http://localhost:8000/getTimestamp/" + storeName + "/c5Fqe7A6COdJVbQqlkZpvYMxPmb2").toPromise()
+    return this.httpClient.get("http://localhost:8000/getTimestamp/" + storeName + "/" + userId).toPromise()
     .then(data => { return data });
   }
 

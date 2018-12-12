@@ -25,7 +25,7 @@ module.exports = function(app, db) {
     db.ref("/stores/" + req.params.storeName + "/" + req.params.userId).once('value').then(function(snap) {
       var market = snap.val()
       console.log("lastItem == ", getLastItem(market.timestamp));
-      res.send(getLastItem(market.timestamp))
+      res.send(JSON.stringify(getLastItem(market.timestamp)))
     })
   })
 
